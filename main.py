@@ -259,6 +259,8 @@ if __name__ == '__main__':
 
     component_title = ['r', 'theta', 'z']
 
+    from cyl_plot import draw_cylidrical_field
+    draw_cylidrical_field(Er_spiral,r_linspace,theta_linspace,z_linspace,'Er')
     # Отрисовка E
     for i, E in enumerate([Er_spiral, Etheta_spiral, Ez_spiral]):
         title = component_title[i]
@@ -295,11 +297,18 @@ if __name__ == '__main__':
     dr  = 1e-3
     dth = 1e-3
     dz  = 1e-3
-    N   = 1000
-    r,theta,z,vr,vth,vz = generate_initial_particle_distribution(N, rmax, zmax, dr, dth, dz)
+    N   = 10
 
+    dt = 1.0
+    qm = 1.0
+    r,theta,z,vr,vth,vz = generate_initial_particle_distribution(N, rmax, zmax, dr, dth, dz)
+    from cyl_plot import draw_cylidric_particles
+
+    draw_cylidric_particles(r,theta,z,0.0,0.0,
+         np.max(r_linspace),
+         np.max(z_linspace))
     push_cyl(r, theta, z,
              vr, vth, vz,
              Er_spiral,Etheta_spiral,Ez_spiral,
              Br_spiral,Btheta_spiral,Bz_spiral,
-             r_linspace,theta_linspace,z_linspace)
+             r_linspace,theta_linspace,z_linspace,dt,qm)
