@@ -18,7 +18,7 @@ def multi_particles_3D(x):
     ax = plt.axes(projection='3d')
     ax.set_xlim(-1, 1)
     ax.set_ylim(-1, 1)
-    ax.set_zlim(-1, 1)
+    ax.set_zlim(0, 1)
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')

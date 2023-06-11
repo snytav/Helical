@@ -332,7 +332,7 @@ if __name__ == '__main__':
          np.max(r_linspace),
          np.max(z_linspace),'red',fig,ax)
 
-    Ntime_steps = 5
+    Ntime_steps = 100
     hist = np.zeros((Ntime_steps,N,3))
     plt.figure()
     for n in range(Ntime_steps):
