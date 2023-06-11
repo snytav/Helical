@@ -305,7 +305,7 @@ if __name__ == '__main__':
     dr  = 1e-3
     dth = 1e-3
     dz  = 1e-3
-    N   = 10
+    N   = 1
 
     Emax = np.max([
                     np.abs(Er_spiral),
@@ -335,6 +335,20 @@ if __name__ == '__main__':
     Ntime_steps = 100
     hist = np.zeros((Ntime_steps,N,3))
     plt.figure()
+
+    # TEMPORARY SETTING SIMPLIFIED FIELDS
+    Er_spiral = np.ones_like(Er_spiral)*0.01                    # V/m
+    Etheta_spiral = np.zeros_like(Etheta_spiral)
+    Ez_spiral  = np.zeros_like(Ez_spiral)
+    Br_spiral = np.zeros_like(Br_spiral)
+    Btheta_spiral = np.zeros_like(Btheta_spiral)
+    Ez_spiral  = np.zeros_like(Bz_spiral)
+
+    q = -1.602176565e-19
+    m = 9.10938215e-31
+    qm = q/m
+    dt = 5e-11
+
     for n in range(Ntime_steps):
        r,theta ,z,vr,vth,vz,x1 = push_cyl(r, theta, z,
                                                  vr, vth, vz,
