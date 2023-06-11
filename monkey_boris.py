@@ -16,7 +16,8 @@ def push_Boris(x,v,qm,E,B,dt):
 
     #s = np.repeat(s, v_prime.shape[0], axis=0)
     v_plus = v_minus + np.cross(v_prime, s)
-    v = v_plus + qm * E * dt / 2
+    v1 = v_plus + qm * E * dt / 2
 
-    x += - v * dt*2
-    return x,v
+    x1 = x - v1 * dt*2
+    print('1st particle shift ',x1[0] - x[0])
+    return x1,v1

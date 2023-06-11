@@ -3,10 +3,42 @@ import numpy as np
 from push_cylindrical import pol2cart
 from draw_cylinder import draw_cyl_3D_along_Z
 
-#
-def draw_cylidric_particles(rr,theta,zz,center_x, center_y, radius, height_z):
+def draw_particle_3D(x,y,z,clr,ax):
+
+    ax.scatter(x, y, z,  color=clr)
+    # draw_cyl_3D_along_Z(center_x, center_y, radius, height_z, ax)
+
+    qq = 0
+
+
+
+
+def multi_particles_3D(x):
     fig = plt.figure()
     ax = plt.axes(projection='3d')
+    ax.set_xlim(-1, 1)
+    ax.set_ylim(-1, 1)
+    ax.set_zlim(-1, 1)
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    colors = ['red', 'black', 'blue', 'brown', 'green', 'yellow', 'magenta', 'grey', 'cyan']
+
+    for n in range(x.shape[1]):
+        xdata = x[:,n,0]
+        ydata = x[:,n,1]
+        zz    = x[:,n,2]
+        c     = colors[n%len(colors)]
+        draw_particle_3D(xdata, ydata, zz, c, ax)
+        qq = 0
+
+    #ax.plot(xdata, ydata, zz,  color=clr)
+    # draw_cyl_3D_along_Z(center_x, center_y, radius, height_z, ax)
+
+    qq = 0
+#
+def draw_cylidric_particles(rr,theta,zz,center_x, center_y, radius, height_z,clr,fig,ax):
+
     xdata = []
     ydata = []
     for r,th in zip(rr,theta):
@@ -16,7 +48,7 @@ def draw_cylidric_particles(rr,theta,zz,center_x, center_y, radius, height_z):
 
     xdata = np.array(xdata)
     ydata = np.array(ydata)
-    ax.scatter3D(xdata, ydata, zz, color='red');
+    ax.scatter3D(xdata, ydata, zz, color=clr);
     draw_cyl_3D_along_Z(center_x, center_y, radius, height_z, ax)
 
     qq = 0
@@ -53,4 +85,4 @@ from field3D import volume_field_plot
 
 def draw_cylidrical_field(fc, r_linspace, theta_linspace, z_linspace,name):
     f = cylidrical_2_cartesion(fc, r_linspace, theta_linspace, z_linspace)
-    volume_field_plot(f)
+    volume_field_plot(f,name)

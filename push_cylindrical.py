@@ -1,5 +1,7 @@
 import numpy as np
 from monkey_boris import push_Boris
+# from cyl_plot import  draw_particles_3D
+import matplotlib.pyplot as plt
 
 def get_theta(x,y):
     th = np.arctan2(y, x)
@@ -12,7 +14,7 @@ def get_theta(x,y):
 def cart2pol(x, y):
     theta = get_theta(x,y)
     r     = np.hypot(x, y)
-    return theta, r
+    return r,theta
 
 def pol2cart( r,theta):
     x = r * np.cos(theta)
@@ -22,11 +24,13 @@ def pol2cart( r,theta):
 def vector_cart2pol(vx,vy,theta):
     vr  = np.cos(theta)*vx+ np.sin(theta)*vy
     vth = -np.sin(theta) * vx + np.cos(theta) * vy
+    return vr,vth
 
 
 def vector_pol2cart(vr, vth, theta):
     vx  = np.cos(theta) * vr - np.sin(theta) * vth
     vy =  np.sin(theta) * vr + np.cos(theta) * vth
+    return vx,vy
 
 def XtoL(x,x0,dh):
     lc = np.divide(x - x0,dh)
@@ -66,7 +70,7 @@ def get_polar_field_2D(lc,r0,dr,data):
     return t
 
 
-def reflect(r,th,z,vr,vz,rmax,zmax):
+def reflect_particle(r,th,z,vr,vz,rmax,zmax):
     if th > 2*np.pi:
         th = th - 2*np.pi
 
@@ -90,7 +94,27 @@ def reflect(r,th,z,vr,vz,rmax,zmax):
         vz = -vz
     return [r,th,z,vr,vz]
 
-def push_cyl(rr,theta,zz,vrr,vtheta,vzz,Er_spiral,Etheta_spiral,Ez_spiral,
+def reflect(rr,theta,zz,vrr,vzz,rmax,zmax):
+
+    for i in range(rr.shape[0]):
+        r  = rr[i]
+        th = theta[i]
+        z  = zz[i]
+        vr = vrr[i]
+        vz = vzz[i]
+        r,th,z,vr,vz = reflect_particle(r,th,z,vr,vz,rmax,zmax)
+        rr[i]    = r
+        theta[i] = th
+        zz[i]    = z
+        vrr[i]   = vr
+        vzz[i]   = vz
+
+    return [rr, theta, zz, vrr, vzz]
+
+from polar_trace import draw_polar_trace
+
+
+def cyl2cart_coordinates_fields(rr,theta,zz,vrr,vtheta,vzz,Er_spiral,Etheta_spiral,Ez_spiral,
              Br_spiral,Btheta_spiral,Bz_spiral,
              r_linspace,theta_linspace,z_linspace,dt,qm):
 
@@ -103,6 +127,10 @@ def push_cyl(rr,theta,zz,vrr,vtheta,vzz,Er_spiral,Etheta_spiral,Ez_spiral,
     rmax = np.max(r_linspace)
     zmax = np.max(z_linspace)
 
+    xx = []
+    vv = []
+    EE = []
+    BB = []
     for i in range(rr.shape[0]):
         r   = rr[i]
         th  = theta[i]
@@ -116,29 +144,108 @@ def push_cyl(rr,theta,zz,vrr,vtheta,vzz,Er_spiral,Etheta_spiral,Ez_spiral,
         er = get_polar_field_2D(lc, r, dr, Er_spiral)
         et = get_polar_field_2D(lc, r, dr, Etheta_spiral)
         ez = get_polar_field_2D(lc, r, dr, Ez_spiral)
-        br = get_polar_field_2D(lc, r, dr, Er_spiral)
-        bt = get_polar_field_2D(lc, r, dr, Etheta_spiral)
-        bz = get_polar_field_2D(lc, r, dr, Ez_spiral)
+        br = get_polar_field_2D(lc, r, dr, Br_spiral)
+        bt = get_polar_field_2D(lc, r, dr, Btheta_spiral)
+        bz = get_polar_field_2D(lc, r, dr, Bz_spiral)
 
         x,y = pol2cart(r,th)
-        vx,vy = vector_pol2cart(vr, vt,theta)
-        Ex,Ey = vector_pol2cart(er,et,theta)
-        Bx,By = vector_pol2cart(br,bt,theta)
+        vx,vy = vector_pol2cart(vr, vth,th)
+        Ex,Ey = vector_pol2cart(er,et,th)
+        Bx,By = vector_pol2cart(br,bt,th)
 
         x = np.array([x,y,z])
         v = np.array([vx, vy, vz])
         E = np.array([Ex, Ey, ez])
         B = np.array([Bx, By, bz])
+        xx.append(x)
+        vv.append(v)
+        EE.append(E)
+        BB.append(B)
 
-        x1,v1 = push_Boris(x, v, qm, E, B, dt)
-        r, th, z, vr, vz = reflect(r,th,z,vr,vz,rmax,zmax)
+    xx = np.array(xx)
+    vv = np.array(vv)
+    EE = np.array(EE)
+    BB = np.array(BB)
 
-        r1, th1   = cart2pol(x1[0],x1[1])
-        vr1,vth1  = vector_cart2pol(v1[0],v1[1],theta)
-        rr[i]     = r1
-        theta[i]  = th1
-        zz[i]     = x1[2]
-        vrr[i]    = vr1
+    return xx,vv,EE,BB
+
+def cart2cyl_coordinates_velocities(xx1,vv1,th):
+
+    rr     = np.zeros(xx1.shape[0])
+    theta  = np.zeros(xx1.shape[0])
+    vrr    = np.zeros(xx1.shape[0])
+    vtheta = np.zeros(xx1.shape[0])
+    zz     = np.zeros(xx1.shape[0])
+    vzz    = np.zeros(xx1.shape[0])
+
+    for i in range(xx1.shape[0]):
+        x1 = xx1[i]
+        v1 = vv1[i]
+        r1, th1 = cart2pol(x1[0], x1[1])
+        vr1, vth1 = vector_cart2pol(v1[0], v1[1], th[i])
+        rr[i] = r1
+        theta[i] = th1
+        zz[i] = x1[2]
+        vrr[i] = vr1
         vtheta[i] = vth1
-        vzz[i]    = x1[2]
+        vzz[i] = v1[2]
 
+    return rr, theta, zz, vrr, vtheta, vzz
+
+
+def push_cyl(rr,theta,zz,vrr,vtheta,vzz,Er_spiral,Etheta_spiral,Ez_spiral,
+             Br_spiral,Btheta_spiral,Bz_spiral,
+             r_linspace,theta_linspace,z_linspace,dt,qm):
+
+    rmax = np.max(r_linspace)
+    zmax = np.max(z_linspace)
+
+    dr = r_linspace[1] - r_linspace[0]
+    dtheta = theta_linspace[1] - theta_linspace[0]
+    dz = z_linspace[1] - z_linspace[0]
+    dh = np.array([dr, dtheta, dz])
+    x0 = np.zeros(3)
+
+    rmax = np.max(r_linspace)
+    zmax = np.max(z_linspace)
+
+    # for i in range(rr.shape[0]):
+    #     r = rr[i]
+    #     th = theta[i]
+    #     z = zz[i]
+    #     vr = vrr[i]
+    #     vth = vtheta[i]
+    #     vz = vzz[i]
+    #     xcyl = np.array([r, th, z])
+    #     lc = XtoL(xcyl, x0, dh)
+    #
+    #     er = get_polar_field_2D(lc, r, dr, Er_spiral)
+    #     et = get_polar_field_2D(lc, r, dr, Etheta_spiral)
+    #     ez = get_polar_field_2D(lc, r, dr, Ez_spiral)
+    #     br = get_polar_field_2D(lc, r, dr, Er_spiral)
+    #     bt = get_polar_field_2D(lc, r, dr, Etheta_spiral)
+    #     bz = get_polar_field_2D(lc, r, dr, Ez_spiral)
+    #
+    #     x, y = pol2cart(r, th)
+    #     vx, vy = vector_pol2cart(vr, vth, th)
+    #     Ex, Ey = vector_pol2cart(er, et, th)
+    #     Bx, By = vector_pol2cart(br, bt, th)
+    #
+    #     x = np.array([x, y, z])
+    #     v = np.array([vx, vy, vz])
+    #     E = np.array([Ex, Ey, ez])
+    #     B = np.array([Bx, By, bz])
+
+    x, v, E, B =     cyl2cart_coordinates_fields(rr, theta, zz,
+                                 vrr, vtheta, vzz,
+                                 Er_spiral, Etheta_spiral, Ez_spiral,
+                                 Br_spiral, Btheta_spiral, Bz_spiral,
+                                 r_linspace, theta_linspace, z_linspace, dt, qm)
+
+    x1, v1 = push_Boris(x, v, qm, E, B, -dt*0.5)
+
+    rr, th, zz, vrr, vtheta, vzz = cart2cyl_coordinates_velocities(x1, v1,theta)
+
+    rr, theta, zz, vrr, vzz = reflect(rr, th, zz, vrr, vzz, rmax, zmax)
+
+    return rr, theta, zz, vrr, vtheta, vzz,x1

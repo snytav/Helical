@@ -2,10 +2,12 @@ import numpy as np
 
 from matplotlib.animation import ArtistAnimation
 
-import matplotlib
+
 
 from matplotlib import pyplot as plt
 from scipy.special import iv, ivp
+
+from cyl_plot import multi_particles_3D
 
 # Константы
 B_0 = 100
@@ -260,33 +262,39 @@ if __name__ == '__main__':
     component_title = ['r', 'theta', 'z']
 
     from cyl_plot import draw_cylidrical_field
-    draw_cylidrical_field(Er_spiral,r_linspace,theta_linspace,z_linspace,'Er')
+    # draw_cylidrical_field(Er_spiral,r_linspace,theta_linspace,z_linspace,'Er')
+    # draw_cylidrical_field(Etheta_spiral, r_linspace, theta_linspace, z_linspace, 'Etheta')
+    # draw_cylidrical_field(Ez_spiral, r_linspace, theta_linspace, z_linspace, 'Ez')
     # Отрисовка E
-    for i, E in enumerate([Er_spiral, Etheta_spiral, Ez_spiral]):
-        title = component_title[i]
-        bmin = E.min()
-        bmax = E.max()
-        draw_3d(E, vmin=bmin, vmax=bmax, title="E" + title + "spiral")
-        draw_rectangle_slice(E, vmin=bmin, vmax=bmax, title="E" + title + "spiral")
-        draw_circle_slice(E, 0.5, vmin=bmin, vmax=bmax)
+    # for i, E in enumerate([Er_spiral, Etheta_spiral, Ez_spiral]):
+    #     title = component_title[i]
+    #     bmin = E.min()
+    #     bmax = E.max()
+    #     draw_3d(E, vmin=bmin, vmax=bmax, title="E" + title + "spiral")
+    #     draw_rectangle_slice(E, vmin=bmin, vmax=bmax, title="E" + title + "spiral")
+    #     draw_circle_slice(E, 0.5, vmin=bmin, vmax=bmax)
 
     # Отрисовка B
-    for i, B in enumerate([Br_spiral, Btheta_spiral, Bz_spiral]):
-        title = component_title[i]
-        bmin = B.min()
-        bmax = B.max()
-        draw_3d(B, vmin=bmin, vmax=bmax, save='B' + title + '_spiral_3d' + '_' + str(C))
-        draw_rectangle_slice(B, vmin=bmin, vmax=bmax, save='B' + title + '_spiral_rect' + '_' + str(C))
-        draw_circle_slice(B, 0.5, vmin=bmin, vmax=bmax, save='B' + title + '_spiral_circle' + '_' + str(C))
+    # draw_cylidrical_field(Br_spiral,r_linspace,theta_linspace,z_linspace,'Br')
+    # draw_cylidrical_field(Btheta_spiral, r_linspace, theta_linspace, z_linspace, 'Btheta')
+    # draw_cylidrical_field(Bz_spiral, r_linspace, theta_linspace, z_linspace, 'Bz')
+
+    # for i, B in enumerate([Br_spiral, Btheta_spiral, Bz_spiral]):
+    #     title = component_title[i]
+    #     bmin = B.min()
+    #     bmax = B.max()
+    #     draw_3d(B, vmin=bmin, vmax=bmax, save='B' + title + '_spiral_3d' + '_' + str(C))
+    #     draw_rectangle_slice(B, vmin=bmin, vmax=bmax, save='B' + title + '_spiral_rect' + '_' + str(C))
+    #     draw_circle_slice(B, 0.5, vmin=bmin, vmax=bmax, save='B' + title + '_spiral_circle' + '_' + str(C))
 
     # Отрисовка V
-    for i, V in enumerate([Vr_spiral, Vtheta_spiral, Vz_spiral]):
-        title = component_title[i]
-        vmin = V.min()
-        vmax = V.max()
-        draw_3d(V, vmin=vmin, vmax=vmax, save='V' + title + '_spiral_3d' + '_' + str(C))
-        draw_rectangle_slice(V, vmin=vmin, vmax=vmax, save='V' + title + '_spiral_rect' + '_' + str(C))
-        draw_circle_slice(V, 0.5, vmin=vmin, vmax=vmax, save='V' + title + '_spiral_circle' + '_' + str(C))
+    # for i, V in enumerate([Vr_spiral, Vtheta_spiral, Vz_spiral]):
+    #     title = component_title[i]
+    #     vmin = V.min()
+    #     vmax = V.max()
+      #  draw_3d(V, vmin=vmin, vmax=vmax, save='V' + title + '_spiral_3d' + '_' + str(C))
+      #  draw_rectangle_slice(V, vmin=vmin, vmax=vmax, save='V' + title + '_spiral_rect' + '_' + str(C))
+      #  draw_circle_slice(V, 0.5, vmin=vmin, vmax=vmax, save='V' + title + '_spiral_circle' + '_' + str(C))
 
 
     from initial_particles import generate_initial_particle_distribution
@@ -299,16 +307,45 @@ if __name__ == '__main__':
     dz  = 1e-3
     N   = 10
 
-    dt = 1.0
+    Emax = np.max([
+                    np.abs(Er_spiral),
+                    np.abs(Etheta_spiral),
+                    np.abs(Ez_spiral)
+                  ])
+
     qm = 1.0
+    dt = dr/(Emax*qm)
+    # s = at^2/2
+    a = qm*Emax
+    s = dr
+    dt = 1e-5 #np.power(2*s/a,0.5)
+
+
     r,theta,z,vr,vth,vz = generate_initial_particle_distribution(N, rmax, zmax, dr, dth, dz)
     from cyl_plot import draw_cylidric_particles
 
+    fig = plt.figure()
+    ax = plt.axes(projection='3d')
+    fig_cart = plt.figure()
+    ax_cart  = plt.axes(projection='3d')
     draw_cylidric_particles(r,theta,z,0.0,0.0,
          np.max(r_linspace),
-         np.max(z_linspace))
-    push_cyl(r, theta, z,
-             vr, vth, vz,
-             Er_spiral,Etheta_spiral,Ez_spiral,
-             Br_spiral,Btheta_spiral,Bz_spiral,
-             r_linspace,theta_linspace,z_linspace,dt,qm)
+         np.max(z_linspace),'red',fig,ax)
+
+    Ntime_steps = 5
+    hist = np.zeros((Ntime_steps,N,3))
+    plt.figure()
+    for n in range(Ntime_steps):
+       r,theta ,z,vr,vth,vz,x1 = push_cyl(r, theta, z,
+                                                 vr, vth, vz,
+                                                 Er_spiral,Etheta_spiral,Ez_spiral,
+                                                 Br_spiral,Btheta_spiral,Bz_spiral,
+                                                 r_linspace,theta_linspace,z_linspace,dt,qm)
+      # draw_particles_3D(x1,'magenta',fig_cart,ax_cart)
+
+       draw_cylidric_particles(r, theta, z, 0.0, 0.0,
+                               np.max(r_linspace),
+                               np.max(z_linspace), 'blue', fig, ax)
+       hist[n,:,:] = x1
+    multi_particles_3D(hist)
+    qq = 0
