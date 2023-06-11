@@ -31,6 +31,8 @@ def multi_particles_3D(x):
         c     = colors[n%len(colors)]
         draw_particle_3D(xdata, ydata, zz, c, ax)
         qq = 0
+    from plot3D_lines import test_plot3d
+    test_plot3d(xdata, ydata, zz)
 
     #ax.plot(xdata, ydata, zz,  color=clr)
     # draw_cyl_3D_along_Z(center_x, center_y, radius, height_z, ax)
