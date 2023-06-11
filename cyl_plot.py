@@ -16,12 +16,16 @@ def draw_particle_3D(x,y,z,clr,ax):
 def multi_particles_3D(x):
     fig = plt.figure()
     ax = plt.axes(projection='3d')
+
     ax.set_xlim(-1, 1)
     ax.set_ylim(-1, 1)
     ax.set_zlim(0, 1)
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
+    ax.quiver(np.zeros(1), np.zeros(1), np.zeros(1), np.zeros(1), np.zeros(1), np.ones(1), length=1.5, normalize=True)
+
+
     colors = ['red', 'black', 'blue', 'brown', 'green', 'yellow', 'magenta', 'grey', 'cyan']
 
     for n in range(x.shape[1]):
