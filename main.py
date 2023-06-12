@@ -318,7 +318,7 @@ if __name__ == '__main__':
     # s = at^2/2
     a = qm*Emax
     s = dr
-    dt = 1e-5 #np.power(2*s/a,0.5)
+    # dt = 1e-9 #np.power(2*s/a,0.5)
 
 
     r,theta,z,vr,vth,vz = generate_initial_particle_distribution(N, rmax, zmax, dr, dth, dz)
@@ -337,7 +337,7 @@ if __name__ == '__main__':
     plt.figure()
 
     # TEMPORARY SETTING SIMPLIFIED FIELDS
-    Er_spiral = np.zeros_like(Er_spiral)*0.01                    # V/m
+    Er_spiral = np.ones_like(Er_spiral)*0.01                    # V/m
     Etheta_spiral = np.zeros_like(Etheta_spiral)
     Ez_spiral  = np.zeros_like(Ez_spiral)
     Br_spiral = np.zeros_like(Br_spiral)
@@ -347,7 +347,7 @@ if __name__ == '__main__':
     q = -1.602176565e-19
     m = 9.10938215e-31
     qm = q/m
-    dt = 1e-3
+    dt = 1e-5
 
     for n in range(Ntime_steps):
        r,theta ,z,vr,vth,vz,x1 = push_cyl(r, theta, z,
@@ -361,5 +361,5 @@ if __name__ == '__main__':
                                np.max(r_linspace),
                                np.max(z_linspace), 'blue', fig, ax)
        hist[n,:,:] = x1
-    multi_particles_3D(hist,'1particle_no_field_v1_')
+    multi_particles_3D(hist,'1particle_Er1_v0_')
     qq = 0

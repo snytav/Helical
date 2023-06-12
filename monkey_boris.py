@@ -19,5 +19,5 @@ def push_Boris(x,v,qm,E,B,dt):
     v1 = v_plus + qm * E * dt / 2
 
     x1 = x - v1 * dt*2
-    print('1st particle shift ',x1[0] - x[0])
+    # print('1st particle shift ',x1[0] - x[0])
     return x1,v1
