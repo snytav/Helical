@@ -332,13 +332,13 @@ if __name__ == '__main__':
          np.max(r_linspace),
          np.max(z_linspace),'red',fig,ax)
 
-    Ntime_steps = 330
+    Ntime_steps = 2000
     hist = np.zeros((Ntime_steps,N,3))
     plt.figure()
 
     # TEMPORARY SETTING SIMPLIFIED FIELDS
-    Er_spiral = np.ones_like(Er_spiral)*0.01                    # V/m
-    Etheta_spiral = np.zeros_like(Etheta_spiral)
+    Er_spiral = np.zeros_like(Er_spiral)                    # V/m
+    Etheta_spiral = np.zeros_like(Etheta_spiral)*0.01
     Ez_spiral  = np.zeros_like(Ez_spiral)
     Br_spiral = np.zeros_like(Br_spiral)
     Btheta_spiral = np.zeros_like(Btheta_spiral)
@@ -347,7 +347,7 @@ if __name__ == '__main__':
     q = -1.602176565e-19
     m = 9.10938215e-31
     qm = q/m
-    dt = 1e-7
+    dt = 1e-2
 
     for n in range(Ntime_steps):
        r,theta ,z,vr,vth,vz,x1 = push_cyl(r, theta, z,
@@ -361,5 +361,5 @@ if __name__ == '__main__':
                                np.max(r_linspace),
                                np.max(z_linspace), 'blue', fig, ax)
        hist[n,:,:] = x1
-    multi_particles_3D(hist,'1particle_Er1_v0_')
+    multi_particles_3D(hist,'1particle_E0_vth0_5_')
     qq = 0
