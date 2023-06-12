@@ -70,29 +70,22 @@ def get_polar_field_2D(lc,r0,dr,data):
     return t
 
 
-def reflect_particle(r,th,z,vr,vz,rmax,zmax):
-    if th > 2*np.pi:
-        th = th - 2*np.pi
+def check_bounds(r,th,z,vr,vz,rmax,zmax,i):
+    if th[i] > 2*np.pi:
+        th[i] = th[i] - 2*np.pi
 
-    if th < 0:
-        th = th + 2 * np.pi
+    if th[i] < 0:
+        th[i] = th[i] + 2 * np.pi
 
-    if r < 0:
-       r = -r
-       vr = -vr
+    if r[i] < 0 or r[i] > rmax or z[i] < 0 or z[i] > zmax:
+       r = np.delete(r,i)
+       th = np.delete(th,i)
+       vr = np.delete(vr,i)
+       vz = np.delete(vz,i)
+       z  = np.delete(z,i)
+       i = i-1
 
-    if r > rmax:
-        r = 2*rmax - r
-        vr = -vr
-
-    if z < 0:
-       z = -z
-       vz = -vz
-
-    if z > zmax:
-        z = 2*zmax - z
-        vz = -vz
-    return [r,th,z,vr,vz]
+    return r,th,z,vr,vz,i
 
 def reflect(rr,theta,zz,vrr,vzz,rmax,zmax):
 
@@ -102,16 +95,24 @@ def reflect(rr,theta,zz,vrr,vzz,rmax,zmax):
         z  = zz[i]
         vr = vrr[i]
         vz = vzz[i]
-        r,th,z,vr,vz = reflect_particle(r,th,z,vr,vz,rmax,zmax)
-        rr[i]    = r
-        theta[i] = th
-        zz[i]    = z
-        vrr[i]   = vr
-        vzz[i]   = vz
+        rr,theta,zz,vrr,vzz,i = check_bounds(rr,theta,zz,vrr,vzz,rmax,zmax,i)
+
 
     return [rr, theta, zz, vrr, vzz]
 
 from polar_trace import draw_polar_trace
+
+def cyl2cart_allcoordinates(rr,theta,zz):
+    xx = np.zeros((rr.shape[0],3))
+    for i in range(rr.shape[0]):
+        r   = rr[i]
+        th  = theta[i]
+        z   = zz[i]
+        x,y = pol2cart(r,th)
+        xx[i,0] = x
+        xx[i,1] = y
+        xx[i,2] = z
+    return xx
 
 
 def cyl2cart_coordinates_fields(rr,theta,zz,vrr,vtheta,vzz,Er_spiral,Etheta_spiral,Ez_spiral,
@@ -246,6 +247,9 @@ def push_cyl(rr,theta,zz,vrr,vtheta,vzz,Er_spiral,Etheta_spiral,Ez_spiral,
 
     rr, th, zz, vrr, vtheta, vzz = cart2cyl_coordinates_velocities(x1, v1,theta)
 
+
+
     rr, theta, zz, vrr, vzz = reflect(rr, th, zz, vrr, vzz, rmax, zmax)
+    x1 = cyl2cart_allcoordinates(rr,theta,zz)
 
     return rr, theta, zz, vrr, vtheta, vzz,x1

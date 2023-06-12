@@ -332,7 +332,7 @@ if __name__ == '__main__':
          np.max(r_linspace),
          np.max(z_linspace),'red',fig,ax)
 
-    Ntime_steps = 400
+    Ntime_steps = 330
     hist = np.zeros((Ntime_steps,N,3))
     plt.figure()
 
@@ -347,7 +347,7 @@ if __name__ == '__main__':
     q = -1.602176565e-19
     m = 9.10938215e-31
     qm = q/m
-    dt = 1e-5
+    dt = 1e-7
 
     for n in range(Ntime_steps):
        r,theta ,z,vr,vth,vz,x1 = push_cyl(r, theta, z,
