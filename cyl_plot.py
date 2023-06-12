@@ -13,7 +13,7 @@ def draw_particle_3D(x,y,z,clr,ax):
 
 
 
-def multi_particles_3D(x):
+def multi_particles_3D(x,name):
     fig = plt.figure()
     ax = plt.axes(projection='3d')
 
@@ -37,7 +37,8 @@ def multi_particles_3D(x):
         qq = 0
 
     #ax.plot(xdata, ydata, zz,  color=clr)
-    # draw_cyl_3D_along_Z(center_x, center_y, radius, height_z, ax)
+    draw_cyl_3D_along_Z(0.0, 0.0, 1.0, 1.0, ax)
+    plt.savefig(name+'.png')
 
     qq = 0
 #
