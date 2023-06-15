@@ -38,8 +38,11 @@ def XtoL(x,x0,dh):
     return lc
 
 def interpolate(data,i,j,k,di,dj,f1,f2):
-    if j == data.shape[1]-1:
-       j = 0
+    out_of_bounds = (i < 0 or i >= data.shape[0]-1 or
+                     j < 0 or j >= data.shape[1]-1 or
+                     k < 0 or k >= data.shape[2] - 1)
+    if out_of_bounds:
+        return 0.0
 
     val = (data[i][j][k] * (1 - di) * (1 - dj) * f2 +
            data[i + 1][j][k] * (di) * (1 - dj) * f2 +
@@ -70,35 +73,22 @@ def get_polar_field_2D(lc,r0,dr,data):
     return t
 
 
-def check_bounds(r,th,z,vr,vz,rmax,zmax,i):
-    if th[i] > 2*np.pi:
-        th[i] = th[i] - 2*np.pi
+def check_bounds(x,v,rmax,zmax,i):
+    r, th = cart2pol(x[0], x[1])
+    z = x[2]
+    return  not  ( r < 0 or r > rmax or z < 0 or z > zmax)
 
-    if th[i] < 0:
-        th[i] = th[i] + 2 * np.pi
+def capture(x,v,rmax,zmax):
+    X = np.concatenate((x, v), axis=0)
+    r = np.hypot(x[0,:], x[1,:])
 
-    if r[i] < 0 or r[i] > rmax or z[i] < 0 or z[i] > zmax:
-       r = np.delete(r,i)
-       th = np.delete(th,i)
-       vr = np.delete(vr,i)
-       vz = np.delete(vz,i)
-       z  = np.delete(z,i)
-       i = i-1
+    X = X[:,r < rmax]
+    X = X[:,X[2,:] < zmax]
+    X = X[:,X[2,:] > 0]
+    v = X[3:,:]
+    x = X[:3,:]
 
-    return r,th,z,vr,vz,i
-
-def reflect(rr,theta,zz,vrr,vzz,rmax,zmax):
-
-    for i in range(rr.shape[0]):
-        r  = rr[i]
-        th = theta[i]
-        z  = zz[i]
-        vr = vrr[i]
-        vz = vzz[i]
-        rr,theta,zz,vrr,vzz,i = check_bounds(rr,theta,zz,vrr,vzz,rmax,zmax,i)
-
-
-    return [rr, theta, zz, vrr, vzz]
+    return x,v
 
 from polar_trace import draw_polar_trace
 
@@ -170,7 +160,7 @@ def cyl2cart_coordinates_fields(rr,theta,zz,vrr,vtheta,vzz,Er_spiral,Etheta_spir
 
     return xx,vv,EE,BB
 
-def cart2cyl_coordinates_velocities(xx1,vv1,th):
+def cart2cyl_coordinates_velocities(xx1,vv1):
 
     rr     = np.zeros(xx1.shape[0])
     theta  = np.zeros(xx1.shape[0])
@@ -183,7 +173,7 @@ def cart2cyl_coordinates_velocities(xx1,vv1,th):
         x1 = xx1[i]
         v1 = vv1[i]
         r1, th1 = cart2pol(x1[0], x1[1])
-        vr1, vth1 = vector_cart2pol(v1[0], v1[1], th[i])
+        vr1, vth1 = vector_cart2pol(v1[0], v1[1], th1)
         rr[i] = r1
         theta[i] = th1
         zz[i] = x1[2]
@@ -194,50 +184,22 @@ def cart2cyl_coordinates_velocities(xx1,vv1,th):
     return rr, theta, zz, vrr, vtheta, vzz
 
 
-def push_cyl(rr,theta,zz,vrr,vtheta,vzz,Er_spiral,Etheta_spiral,Ez_spiral,
+def push_cyl(x,v,Er_spiral,Etheta_spiral,Ez_spiral,
              Br_spiral,Btheta_spiral,Bz_spiral,
              r_linspace,theta_linspace,z_linspace,dt,qm):
 
     rmax = np.max(r_linspace)
     zmax = np.max(z_linspace)
 
+
+
     dr = r_linspace[1] - r_linspace[0]
-    dtheta = theta_linspace[1] - theta_linspace[0]
     dz = z_linspace[1] - z_linspace[0]
-    dh = np.array([dr, dtheta, dz])
-    x0 = np.zeros(3)
+    # zmax = np.max(z_linspace)
 
-    rmax = np.max(r_linspace)
-    zmax = np.max(z_linspace)
+    rr, theta, zz, vrr, vtheta, vzz = cart2cyl_coordinates_velocities(x, v)
 
-    # for i in range(rr.shape[0]):
-    #     r = rr[i]
-    #     th = theta[i]
-    #     z = zz[i]
-    #     vr = vrr[i]
-    #     vth = vtheta[i]
-    #     vz = vzz[i]
-    #     xcyl = np.array([r, th, z])
-    #     lc = XtoL(xcyl, x0, dh)
-    #
-    #     er = get_polar_field_2D(lc, r, dr, Er_spiral)
-    #     et = get_polar_field_2D(lc, r, dr, Etheta_spiral)
-    #     ez = get_polar_field_2D(lc, r, dr, Ez_spiral)
-    #     br = get_polar_field_2D(lc, r, dr, Er_spiral)
-    #     bt = get_polar_field_2D(lc, r, dr, Etheta_spiral)
-    #     bz = get_polar_field_2D(lc, r, dr, Ez_spiral)
-    #
-    #     x, y = pol2cart(r, th)
-    #     vx, vy = vector_pol2cart(vr, vth, th)
-    #     Ex, Ey = vector_pol2cart(er, et, th)
-    #     Bx, By = vector_pol2cart(br, bt, th)
-    #
-    #     x = np.array([x, y, z])
-    #     v = np.array([vx, vy, vz])
-    #     E = np.array([Ex, Ey, ez])
-    #     B = np.array([Bx, By, bz])
-
-    x, v, E, B =     cyl2cart_coordinates_fields(rr, theta, zz,
+    _, _, E, B =     cyl2cart_coordinates_fields(rr, theta, zz,
                                  vrr, vtheta, vzz,
                                  Er_spiral, Etheta_spiral, Ez_spiral,
                                  Br_spiral, Btheta_spiral, Bz_spiral,
@@ -245,11 +207,8 @@ def push_cyl(rr,theta,zz,vrr,vtheta,vzz,Er_spiral,Etheta_spiral,Ez_spiral,
 
     x1, v1 = push_Boris(x, v, qm, E, B, -dt*0.5)
 
-    rr, th, zz, vrr, vtheta, vzz = cart2cyl_coordinates_velocities(x1, v1,theta)
+    x2,v2 = capture(x1.T,v.T,rmax-dr, zmax-dz)
+    # x1 = cyl2cart_allcoordinates(rr,theta,zz)
+    qq = 0
 
-
-
-    rr, theta, zz, vrr, vzz = reflect(rr, th, zz, vrr, vzz, rmax, zmax)
-    x1 = cyl2cart_allcoordinates(rr,theta,zz)
-
-    return rr, theta, zz, vrr, vtheta, vzz,x1
+    return x2,v2

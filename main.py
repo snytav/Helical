@@ -332,7 +332,7 @@ if __name__ == '__main__':
          np.max(r_linspace),
          np.max(z_linspace),'red',fig,ax)
 
-    Ntime_steps = 2000
+    Ntime_steps = 600
     hist = np.zeros((Ntime_steps,N,3))
     plt.figure()
 
@@ -349,17 +349,27 @@ if __name__ == '__main__':
     qm = q/m
     dt = 1e-2
 
+    from push_cylindrical import cyl2cart_coordinates_fields
+
+    x, v, E, B = cyl2cart_coordinates_fields(r, theta, z,
+                                             vr, vth, vz,
+                                             Er_spiral, Etheta_spiral, Ez_spiral,
+                                             Br_spiral, Btheta_spiral, Bz_spiral,
+                                             r_linspace, theta_linspace, z_linspace, dt, qm)
+
     for n in range(Ntime_steps):
-       r,theta ,z,vr,vth,vz,x1 = push_cyl(r, theta, z,
-                                                 vr, vth, vz,
-                                                 Er_spiral,Etheta_spiral,Ez_spiral,
-                                                 Br_spiral,Btheta_spiral,Bz_spiral,
-                                                 r_linspace,theta_linspace,z_linspace,dt,qm)
+       x1,v1 = push_cyl(x,v,
+                        Er_spiral,Etheta_spiral,Ez_spiral,
+                        Br_spiral,Btheta_spiral,Bz_spiral,
+                        r_linspace,theta_linspace,z_linspace,dt,qm)
       # draw_particles_3D(x1,'magenta',fig_cart,ax_cart)
+       if x1.shape[1] == 0:
+           break
 
        draw_cylidric_particles(r, theta, z, 0.0, 0.0,
                                np.max(r_linspace),
                                np.max(z_linspace), 'blue', fig, ax)
-       hist[n,:,:] = x1
-    multi_particles_3D(hist,'1particle_E0_vth0_5_')
+       hist[n,:,:] = x1.T
+       x,v = x1.T,v1.T
+    multi_particles_3D(hist,'1particle_E0_vth1_')
     qq = 0
