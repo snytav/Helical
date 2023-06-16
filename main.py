@@ -338,7 +338,7 @@ if __name__ == '__main__':
 
     # TEMPORARY SETTING SIMPLIFIED FIELDS
     Er_spiral = np.zeros_like(Er_spiral)                    # V/m
-    Etheta_spiral = np.ones_like(Etheta_spiral)*0.01
+    Etheta_spiral = -np.ones_like(Etheta_spiral)*0.01
     Ez_spiral  = np.zeros_like(Ez_spiral)
     Br_spiral = np.zeros_like(Br_spiral)
     Btheta_spiral = np.zeros_like(Btheta_spiral)
@@ -371,5 +371,5 @@ if __name__ == '__main__':
                                np.max(z_linspace), 'blue', fig, ax)
        hist[n,:,:] = x1.T
        x,v = x1.T,v1.T
-    multi_particles_3D(hist,'1particle_E0_vth1_')
+    multi_particles_3D(hist,'1particle_Eth-1_vth0_')
     qq = 0
