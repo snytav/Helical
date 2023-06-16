@@ -6,7 +6,7 @@ def generate_initial_particle_distribution(N,rmax,zmax,dr,dth,dz):
     z = zmax * np.random.random(N)
     vr = np.zeros(N) # np.random.normal(0, dr, N)
     vz = np.zeros(N) #np.random.normal(0, dz, N)
-    vth = np.zeros(N)  #2*np.pi*np.random.normal(0, dth, N)
+    vth = 0.7e2*np.ones(N)  #2*np.pi*np.random.normal(0, dth, N)
     #vth = np.multiply(r,vth)
 
     return [r,theta,z,vr,vth,vz]
