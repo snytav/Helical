@@ -338,7 +338,7 @@ if __name__ == '__main__':
 
     # TEMPORARY SETTING SIMPLIFIED FIELDS
     Er_spiral = np.zeros_like(Er_spiral)                    # V/m
-    Etheta_spiral = np.zeros_like(Etheta_spiral)*0.01
+    Etheta_spiral = np.ones_like(Etheta_spiral)*0.01
     Ez_spiral  = np.zeros_like(Ez_spiral)
     Br_spiral = np.zeros_like(Br_spiral)
     Btheta_spiral = np.zeros_like(Btheta_spiral)
@@ -347,7 +347,7 @@ if __name__ == '__main__':
     q = -1.602176565e-19
     m = 9.10938215e-31
     qm = q/m
-    dt = 1e-2
+    dt = 1e-5
 
     from push_cylindrical import cyl2cart_coordinates_fields
 
